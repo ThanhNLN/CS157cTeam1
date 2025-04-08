@@ -1,42 +1,25 @@
 
-from dotenv import load_dotenv
-import os
 from services.neo4j_service import Neo4jService
+from services.redis_service import RedisService
 from flask import Flask
-from flask_cors import CORS
-from routes.flight_plan import flight_plan_bp  # Import the route blueprint
+from dotenv import load_dotenv
+import logging
 
-app = Flask(__name__)
-
-# Load env for environment credential
-load_dotenv()
-
-# Initialize Neo4j connection
-neo4j = Neo4jService(
-    uri=os.getenv("NEO4J_URI"),
-    user=os.getenv("NEO4J_USER"),
-    password=os.getenv("NEO4J_PASSWORD")
+load_dotenv(override=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname).4s - %(name)s - %(asctime)s - %(message)s"
 )
 
-CORS(app)
+app = Flask(__name__)
+neo4jService = Neo4jService()
+redisService = RedisService()
 
-# Register route blueprint here
-app.register_blueprint(flight_plan_bp)
-
-@app.route("/")
-def home():
-    return "Flight Planner Backend Running!"
-
-
-@app.route("/neo4j-test")
+@app.route("/neo4j-test", methods=["GET"])
 def neo4j_test():
-    try:
-        msg = neo4j.test_connection()
-        print(f"Neo4j test message: {msg}")
-        return {"status": "success", "message": msg}
-    except Exception as e:
-        print(f"Neo4j connection error: {e}")
-        return {"status": "error", "message": str(e)}
+    neo4jService.create("CREATE (n:TestNode {name: 'Test'})")
+    redisService.set("test_key", "test_value")
+    return redisService.get("test_key")
 
 
 if __name__ == "__main__":
