@@ -24,7 +24,7 @@ class RedisService:
         cls.client = redis.StrictRedis(
           host=host,
           port=port,
-          # password=password,
+          password=password,
           decode_responses=True
         )
     return cls._instance

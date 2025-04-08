@@ -5,6 +5,7 @@ import logging
 
 
 logger = logging.getLogger(__name__)
+
 class Neo4jService:
     # static variables, singleton for db thread safety
     _instance = None
@@ -16,9 +17,9 @@ class Neo4jService:
                 logger.log(20, 'Creating new Neo4jService instance')
                 cls._instance = super(Neo4jService, cls).__new__(cls)
 
-                uri = os.getenv("NEO4J_URI")
-                user = os.getenv("NEO4J_USER")
-                password = os.getenv("NEO4J_PASSWORD")
+                uri = os.getenv("NEO4J_URI", 'localhost')
+                user = os.getenv("NEO4J_USER", 'neo4j')
+                password = os.getenv("NEO4J_PASSWORD", 'password')
 
                 cls.driver = GraphDatabase.driver(uri, auth=(user, password))
         return cls._instance
