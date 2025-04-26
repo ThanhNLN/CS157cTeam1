@@ -20,6 +20,7 @@ field_names = {
     "SEG_MAG_COURSE": "segmentMagneticCourse",
     "SEG_MAG_COURSE_OPP": "segmentMagneticCourseOpp",
     "D_NEXT_PT_NM": "dNextPtNm",
+    "D_NEXT_PT_NM": "distance",
     "MEA": "mea",
     "MEA_DIR_OPP": "meaDirOpp",
     "MAX_ALT": "maxAlt",
