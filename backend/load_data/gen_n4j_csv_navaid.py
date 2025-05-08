@@ -18,7 +18,7 @@ field_names = {
     "ICAO": "icao",
     "LAT": "latitude",
     "LONG": "longitude",
-    "TYPE": "fixType",
+    #"TYPE": "fixType",
     "USE": "use",
     "NAS_ID": "nasId",
     "HIGH_ARTCC": "highArtcc",
@@ -32,7 +32,7 @@ field_names = {
     "NAVAID_LONG": "longitude",
     "MRA": "mra",
     # APT
-    "TYPE": "aptType",
+    #"TYPE": "aptType",
     "LOCATION_ID": "navaidId:ID",
     "CITY": "city",
     "NAME": "name",
@@ -52,6 +52,7 @@ with open("NAVAID.csv", "w+") as navaid_file:
         fix_data = json.load(fix_file)
         for data in fix_data:
             tl_data = translate_keys(field_names, data)
+            tl_data["fixType"] = data["TYPE"]
             tl_data[':LABEL'] = 'NAVAID;FIX'
             if tl_data["navaidId:ID"] in tl_data_dict:
                 tl_data_dict[tl_data["navaidId:ID"]] = tl_data | tl_data_dict[tl_data["navaidId:ID"]]
@@ -76,6 +77,7 @@ with open("NAVAID.csv", "w+") as navaid_file:
         tl_data_list = []
         for data in apt_data:
             tl_data = translate_keys(field_names, data)
+            tl_data["aptType"] = data["TYPE"]
             tl_data[':LABEL'] = 'NAVAID;APT'
             if tl_data["navaidId:ID"] in tl_data_dict:
                 if ";APT" not in tl_data_dict[tl_data["navaidId:ID"]][':LABEL']:

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+python3 convert_apt.py
+python3 convert_awy.py
+python3 convert_fix.py
+
+python3 gen_n4j_csv_awy.py
+python3 gen_n4j_csv_navaid.py
+
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
   exit
