@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { MapModule } from './map/map.module';
+import { ConfigModule } from '@nestjs/config';
+import { WeatherModule } from './weather/weather.module';
 
 @Module({
-  imports: [MapModule],
+  imports: [WeatherModule, ConfigModule.forRoot()],
   controllers: [],
   providers: [],
 })

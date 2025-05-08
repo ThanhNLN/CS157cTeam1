@@ -1,4 +1,4 @@
-export interface Node {
+export interface Navaid {
   id: string;
   lat: number;
   long: number;

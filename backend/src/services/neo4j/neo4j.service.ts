@@ -7,7 +7,25 @@ export class Neo4jService {
   constructor(private readonly neo4jService: Neo4jBaseService) {}
 
   async deleteAll() {
-    await this.neo4jService.write('MATCH (n) DETACH DELETE n', {});
+    const numberOfNodes = await this.neo4jService.read(
+      'MATCH (p:NAVAID) RETURN count(p) as count',
+    );
+    const count = numberOfNodes.records[0].get('count').toInt();
+
+    await Promise.all(
+      Array.from({ length: count / 10 + 1 }).map(() =>
+        this.neo4jService.write(`MATCH (p:NAVAID)
+          WITH p
+          LIMIT 100000
+          DELETE p`),
+      ),
+    );
+    console.log('All nodes and relationships deleted');
+  }
+
+  async getAll() {
+    const result = await this.neo4jService.read('MATCH (p:NAVAID) RETURN p');
+    return result.records.map((record) => record.get('p').properties);
   }
 
   async write(
