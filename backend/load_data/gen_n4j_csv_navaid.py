@@ -16,8 +16,8 @@ field_names = {
     "ID": "navaidId:ID",
     "STATE": "state",
     "ICAO": "icao",
-    "LAT": "latitude",
-    "LONG": "longitude",
+    "LAT": "latitude:double",
+    "LONG": "longitude:double",
     #"TYPE": "fixType",
     "USE": "use",
     "NAS_ID": "nasId",
@@ -28,24 +28,24 @@ field_names = {
     "NAVAID_NAME": "navaidId:ID",
     "NAVAID_TYPE": "navaidType",
     "ICAO_REGION": "icao",
-    "NAVAID_LAT": "latitude",
-    "NAVAID_LONG": "longitude",
+    "NAVAID_LAT": "latitude:double",
+    "NAVAID_LONG": "longitude:double",
     "MRA": "mra",
     # APT
     #"TYPE": "aptType",
     "LOCATION_ID": "navaidId:ID",
     "CITY": "city",
     "NAME": "name",
-    "LAT": "latitude",
-    "LONG": "longitude",
+    "LAT": "latitude:double",
+    "LONG": "longitude:double",
     "STATUS": "status",
     # Extras
     "EXTRA1": ":LABEL",
 }
 
 stardp_fields = {
-    "NAVAID_LAT": "latitude",
-    "NAVAID_LONG": "longitude",
+    "NAVAID_LAT": "latitude:double",
+    "NAVAID_LONG": "longitude:double",
     "NAVAID_ID": "navaidId:ID",
 }
 
