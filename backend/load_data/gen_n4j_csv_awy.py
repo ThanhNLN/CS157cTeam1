@@ -5,6 +5,8 @@ import json
 import csv
 import importlib
 
+from math import sin, cos, sqrt, atan2, radians
+
 HAS_GEOPY = False
 geopy_loader = importlib.util.find_spec('geopy')
 if geopy_loader is not None:
@@ -75,7 +77,23 @@ def calc_dist(p1, p2):
     if HAS_GEOPY:
         return geopy.distance.distance((p1["latitudeFrom"], p1["longitudeFrom"]), (p2["latitudeFrom"], p2["longitudeFrom"])).nm
     else:
-        return 1.00
+        R = 3,443.8 # nautical miles
+
+        lat1 = radians(p1["latitudeFrom"])
+        lon1 = radians(p1["longitudeFrom"])
+        lat2 = radians(p2["latitudeFrom"])
+        lon2 = radians(p2["longitudeFrom"])
+        
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+
+        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        
+        distance = R * c
+
+        return distance
+
 
 with open("AIRWAY.csv", "w+") as airway_file:
     writer = csv.DictWriter(
