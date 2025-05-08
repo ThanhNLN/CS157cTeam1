@@ -100,7 +100,7 @@ with open("NAVAID.csv", "w+") as navaid_file:
                     route = []
                     for pts in item[idx]:
                         tl_data = translate_keys(stardp_fields, pts)
-                        tl_data[":TYPE"] = "AIRWAY_ROUTE"
+                        tl_data[":LABEL"] = "NAVAID;STARDP"
 
                         if tl_data["navaidId:ID"] in tl_data_dict:
                             tl_data_dict[tl_data["navaidId:ID"]] = tl_data | tl_data_dict[tl_data["navaidId:ID"]]
