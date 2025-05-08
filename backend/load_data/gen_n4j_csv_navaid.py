@@ -43,6 +43,12 @@ field_names = {
     "EXTRA1": ":LABEL",
 }
 
+stardp_fields = {
+    "NAVAID_LAT": "latitude",
+    "NAVAID_LONG": "longitude",
+    "NAVAID_ID": "navaidId:ID",
+}
+
 with open("NAVAID.csv", "w+") as navaid_file:
     writer = csv.DictWriter(navaid_file, set(field_names.values()), restval="", extrasaction="ignore")
     writer.writeheader()
@@ -85,5 +91,21 @@ with open("NAVAID.csv", "w+") as navaid_file:
                 tl_data_dict[tl_data["navaidId:ID"]] = tl_data | tl_data_dict[tl_data["navaidId:ID"]]
             else:
                 tl_data_dict[tl_data["navaidId:ID"]] = tl_data
+
+    with open("STARDP.json", "r+", encoding="utf-8") as stardp_file:
+        stardp_data = json.load(stardp_file)
+        for key, data in stardp_data.items():
+            for item in data:
+                for idx in range(len(item)):
+                    route = []
+                    for pts in item[idx]:
+                        tl_data = translate_keys(stardp_fields, pts)
+                        tl_data[":TYPE"] = "AIRWAY_ROUTE"
+
+                        if tl_data["navaidId:ID"] in tl_data_dict:
+                            tl_data_dict[tl_data["navaidId:ID"]] = tl_data | tl_data_dict[tl_data["navaidId:ID"]]
+                        else:
+                            tl_data_dict[tl_data["navaidId:ID"]] = tl_data
+                    
 
     writer.writerows(tl_data_dict.values())

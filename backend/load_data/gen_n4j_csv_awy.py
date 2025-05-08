@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+
+import sys
 import json
 import csv
 
@@ -13,7 +15,7 @@ def translate_keys(key_map: dict, data: dict) -> dict:
 
 
 field_names = {
-    "ID": "name",
+    "ID": "name:string[]",
     "TYPE": "type",
     "D_NEXT_PT": "dNextPt",
     "BEARING": "bearing",
@@ -49,6 +51,18 @@ field_names = {
     "EXTRA1": ":END_ID",
     "EXTRA2": ":TYPE"
 }
+
+stardp_fields = {
+    "ID": "name:string[]",
+    "TYPE": "type",
+    # "NAVAID_LAT": "latitudeFrom",
+    # "NAVAID_LONG": "longitudeFrom",
+    "NAVAID_ID": ":START_ID",
+    "STARDP_CODE": "stardpCode",
+    "TRANSITION_NAME": "transitionName",
+    "AIRWAY_IDENT": "airwayIdent",
+}
+
 with open("AIRWAY.csv", "w+") as airway_file:
     writer = csv.DictWriter(
         airway_file, set(field_names.values()), restval="", extrasaction="ignore"
@@ -68,7 +82,7 @@ with open("AIRWAY.csv", "w+") as airway_file:
                 tl_data_dict[f"{awy_id}_{awy_type}"] = [(awy_seq_num, tl_data)]
 
     # can't guarantee order above so done here:
-    routes = []
+    routes = {}
     for key in tl_data_dict:
         cur_route = tl_data_dict[key]
         cur_route.sort(key=lambda x: x[0])
@@ -77,6 +91,41 @@ with open("AIRWAY.csv", "w+") as airway_file:
             cur_route_with_end_id[-1][":END_ID"] = vals[":START_ID"]
             cur_route_with_end_id.append(vals)
         cur_route_with_end_id.pop() # remove last one.
-        routes.extend(cur_route_with_end_id)
+        for r in cur_route_with_end_id:
+            if f"{r[':START_ID']}_{r[':END_ID']}" not in routes:
+                r["name:string[]"] = [r["name:string[]"]]
+                routes[f"{r[':START_ID']}_{r[':END_ID']}"] = r
+            else:
+                routes[f"{r[':START_ID']}_{r[':END_ID']}"]["name:string[]"].append(r["name:string[]"])
 
-    writer.writerows(routes)
+    with open("STARDP.json", "r+", encoding="utf-8") as stardp_file:
+        stardp_data = json.load(stardp_file)
+        for key, data in stardp_data.items():
+            basic, apt, extra = data
+
+            basic_list = []
+            for idx in range(len(basic)):
+                route = []
+                for pts in basic[idx]:
+                    tl_basic = translate_keys(stardp_fields, pts)
+                    tl_basic[":TYPE"] = "AIRWAY_ROUTE"
+                    route.append(tl_basic)
+
+                for idx2 in range(len(route)-1):
+                    if f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}" not in routes:
+                        route[idx2][":END_ID"] = route[idx2+1][':START_ID']
+                        route[idx2]["name:string[]"] = [route[idx2]["name:string[]"]]
+                        routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"] = route[idx2]
+                    elif route[idx2]["name:string[]"] not in routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"]["name:string[]"]:
+                        routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"]["name:string[]"].append(route[idx2]["name:string[]"])
+                for aa in apt[idx]:
+                    tl_aa = translate_keys(stardp_fields, aa)
+                    # print(route)
+                    if f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}" not in routes:
+                        route[-1]["name:string[]"] = [route[-1]["name:string[]"]] if type(route[-1]["name:string[]"]) == str else route[-1]["name:string[]"]
+                        route[-1][":END_ID"] = tl_aa[':START_ID']
+                        routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"] = route[-1]
+                    elif route[-1]["name:string[]"] not in routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"]:
+                        routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"].append(route[-1]["name:string[]"])
+
+    writer.writerows(routes.values())
