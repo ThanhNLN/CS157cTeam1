@@ -75,6 +75,10 @@ with open("AIRWAY.csv", "w+") as airway_file:
             awy_id, awy_type, awy_seq_num_str = key.split("_") # self-defined
             awy_seq_num = int(awy_seq_num_str)
             data["D_NEXT_PT_NM"] = float(data["D_NEXT_PT_NM"]) if data["D_NEXT_PT_NM"] else ""
+            if not data["D_NEXT_PT_NM"]:
+                data["D_NEXT_PT_NM"] = float(data["D_NEXT_PT"]) if data["D_NEXT_PT"] else ""
+            if not data["D_NEXT_PT_NM"]:
+                data["D_NEXT_PT_NM"] = 5.00 # some weight
             tl_data = translate_keys(field_names, data)
             tl_data[":TYPE"] = "AIRWAY_ROUTE"
             if f"{awy_id}_{awy_type}" in tl_data_dict:
@@ -113,7 +117,7 @@ with open("AIRWAY.csv", "w+") as airway_file:
 
                 for idx2 in range(len(route)-1):
                     if f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}" not in routes:
-                        route[-1]["distance:double"] = "1.00"
+                        route[idx2]["distance:double"] = "1.00"
                         route[idx2][":END_ID"] = route[idx2+1][':START_ID']
                         routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"] = route[idx2]
                     elif route[idx2]["name:string[]"] not in routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"]["name:string[]"]:
@@ -121,11 +125,39 @@ with open("AIRWAY.csv", "w+") as airway_file:
                 for aa in apt[idx]:
                     tl_aa = translate_keys(stardp_fields, aa)
                     # print(route)
-                    if f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}" not in routes:
-                        route[-1]["distance:double"] = "1.00"
-                        route[-1][":END_ID"] = tl_aa[':START_ID']
-                        routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"] = route[-1]
-                    elif route[-1]["name:string[]"] not in routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"]:
-                        routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"] += ";" + route[-1]["name:string[]"]
+                    if route[-1]["name:string[]"][0] == "S":
+                        if f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}" not in routes:
+                            route[-1]["distance:double"] = "1.00"
+                            route[-1][":END_ID"] = tl_aa[':START_ID']
+                            routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"] = route[-1]
+                        elif route[-1]["name:string[]"] not in routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"]:
+                            routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"] += ";" + route[-1]["name:string[]"]
+                    else: # departure
+                        if f"{tl_aa[':START_ID']}_{route[0][':START_ID']}" not in routes:
+                            route[0]["distance:double"] = "1.00"
+                            route[0][":END_ID"] = tl_aa[':START_ID']
+                            routes[f"{tl_aa[':START_ID']}_{route[0][':START_ID']}"] = route[0]
+                        elif route[0]["name:string[]"] not in routes[f"{tl_aa[':START_ID']}_{route[0][':START_ID']}"]["name:string[]"]:
+                            routes[f"{tl_aa[':START_ID']}_{route[0][':START_ID']}"]["name:string[]"] += ";" + route[0]["name:string[]"]
+                for idx2 in range(len(extra)):
+                    route2 = []
+                    for pts in extra[idx2]:
+                        tl_extra = translate_keys(stardp_fields, pts)
+                        tl_extra[":TYPE"] = "AIRWAY_ROUTE"
+                        route2.append(tl_extra)
+                    for idx3 in range(len(route2)-1):
+                        if f"{route2[idx3][':START_ID']}_{route2[idx3+1][':START_ID']}" not in routes:
+                            route2[idx3]["distance:double"] = "1.00"
+                            route2[idx3][":END_ID"] = route2[idx3+1][':START_ID']
+                            routes[f"{route2[idx3][':START_ID']}_{route2[idx3+1][':START_ID']}"] = route2[idx3]
+                        elif route2[idx3]["name:string[]"] not in routes[f"{route2[idx3][':START_ID']}_{route2[idx3+1][':START_ID']}"]["name:string[]"]:
+                            routes[f"{route2[idx3][':START_ID']}_{route2[idx3+1][':START_ID']}"]["name:string[]"] += ";" + route2[idx3]["name:string[]"]
 
+                    # if tl_extra["name:string[]"][0] == "S":
+                    #     if f"{route2[-1][':START_ID']}_{route[0][':START_ID']}" not in routes:
+                    #         route2[-1]["distance:double"] = "1.00"
+                    #         route2[-1][":END_ID"] = route[0][':START_ID']
+                    #         routes[f"{route2[-1][':START_ID']}_{route[0][':START_ID']}"] = route2[-1]
+                    #     elif route2[-1]["name:string[]"] not in routes[f"{route2[-1][':START_ID']}_{route[0][':START_ID']}"]["name:string[]"]:
+                    #         routes[f"{route2[-1][':START_ID']}_{route[0][':START_ID']}"]["name:string[]"] += ";" + route[-1]["name:string[]"]
     writer.writerows(routes.values())

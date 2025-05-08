@@ -57,6 +57,12 @@ with open("STARDP.txt", "r+", encoding="ISO8859-1") as faa_data:
                 del line_item[k]
 
             if last_pt["ID"] != line_item["ID"]:
+                if last_pt["TYPE"]:
+                    if last_pt["TYPE"] == "AA":
+                        data[last_pt["ID"]][0].append(temp_data[last_pt["ID"]][0])
+                        data[last_pt["ID"]][1].append(temp_data[last_pt["ID"]][1])
+                    else:
+                        data[last_pt["ID"]][2].append(temp_data[last_pt["ID"]][0])
                 parse_state = ParseState.NEW
                 route_idx = 0
                 # if line_item["ID"][0] == "S":
@@ -92,7 +98,7 @@ with open("STARDP.txt", "r+", encoding="ISO8859-1") as faa_data:
                         data[last_pt["ID"]][2].append(temp_data[last_pt["ID"]][0])
                         
                     temp_data[line_item["ID"]] = ([], [], []) # route, airport, post-transition pts
-                if line_item["TYPE"] not in "AA" and parse_state in [ParseState.NEW, ParseState.ROUTE]:
+                if line_item["TYPE"] not in ["AA"] and parse_state in [ParseState.NEW, ParseState.ROUTE]:
                     parse_state = ParseState.ROUTE
                     temp_data[line_item["ID"]][0].append(line_item)
                 elif line_item["TYPE"] not in ["AA"] and parse_state == ParseState.APT:
