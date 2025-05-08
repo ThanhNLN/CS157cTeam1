@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+.gmnoprint a,
+.gmnoprint span,
+.gmnoprint div {
+  background: none !important;
+  display: none !important;
+}
+#GMapsID div div a div img {
+  display: none;
+}
