@@ -3,8 +3,6 @@ import { Cron } from '@nestjs/schedule';
 import { Neo4jService } from 'src/services/neo4j/neo4j.service';
 import { WeatherHttpService } from 'src/services/weather-http/weather-http.service';
 
-import { write, writeFileSync } from 'fs';
-
 @Injectable()
 export class WeatherService {
   constructor(
@@ -33,7 +31,6 @@ export class WeatherService {
     const delay = (ms: number) =>
       new Promise((resolve) => setTimeout(resolve, ms));
 
-    // TODO: set weatherCost here
     for (const chunk of chunks) {
       const weatherData = await this.weatherHttpService.getWeatherData(chunk);
 
@@ -52,7 +49,7 @@ export class WeatherService {
           windSpeed: data.hourly.wind_speed_180m[0],
           weatherCost: 0,
         };
-        weather.weatherCost = 0;
+        weather.weatherCost = 0; // TODO: set weatherCost here
         return weather;
       });
 
