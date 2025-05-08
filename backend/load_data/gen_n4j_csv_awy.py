@@ -3,7 +3,7 @@
 import sys
 import json
 import csv
-import importlib
+import importlib.util
 
 from math import sin, cos, sqrt, atan2, radians
 
