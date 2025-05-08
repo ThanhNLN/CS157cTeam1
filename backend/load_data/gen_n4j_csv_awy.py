@@ -22,7 +22,7 @@ field_names = {
     "SEG_MAG_COURSE": "segmentMagneticCourse",
     "SEG_MAG_COURSE_OPP": "segmentMagneticCourseOpp",
     "D_NEXT_PT_NM": "dNextPtNm",
-    "D_NEXT_PT_NM": "distance",
+    "D_NEXT_PT_NM": "distance:double",
     "MEA": "mea",
     "MEA_DIR_OPP": "meaDirOpp",
     "MAX_ALT": "maxAlt",
@@ -74,6 +74,7 @@ with open("AIRWAY.csv", "w+") as airway_file:
         for key, data in awy_data.items():
             awy_id, awy_type, awy_seq_num_str = key.split("_") # self-defined
             awy_seq_num = int(awy_seq_num_str)
+            data["D_NEXT_PT_NM"] = float(data["D_NEXT_PT_NM"]) if data["D_NEXT_PT_NM"] else ""
             tl_data = translate_keys(field_names, data)
             tl_data[":TYPE"] = "AIRWAY_ROUTE"
             if f"{awy_id}_{awy_type}" in tl_data_dict:
@@ -93,10 +94,9 @@ with open("AIRWAY.csv", "w+") as airway_file:
         cur_route_with_end_id.pop() # remove last one.
         for r in cur_route_with_end_id:
             if f"{r[':START_ID']}_{r[':END_ID']}" not in routes:
-                r["name:string[]"] = [r["name:string[]"]]
                 routes[f"{r[':START_ID']}_{r[':END_ID']}"] = r
-            else:
-                routes[f"{r[':START_ID']}_{r[':END_ID']}"]["name:string[]"].append(r["name:string[]"])
+            elif r["name:string[]"] not in routes[f"{r[':START_ID']}_{r[':END_ID']}"]["name:string[]"]:
+                routes[f"{r[':START_ID']}_{r[':END_ID']}"]["name:string[]"] += ";" + r["name:string[]"]
 
     with open("STARDP.json", "r+", encoding="utf-8") as stardp_file:
         stardp_data = json.load(stardp_file)
@@ -113,19 +113,19 @@ with open("AIRWAY.csv", "w+") as airway_file:
 
                 for idx2 in range(len(route)-1):
                     if f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}" not in routes:
+                        route[-1]["distance:double"] = "1.00"
                         route[idx2][":END_ID"] = route[idx2+1][':START_ID']
-                        route[idx2]["name:string[]"] = [route[idx2]["name:string[]"]]
                         routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"] = route[idx2]
                     elif route[idx2]["name:string[]"] not in routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"]["name:string[]"]:
-                        routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"]["name:string[]"].append(route[idx2]["name:string[]"])
+                        routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"]["name:string[]"] += ";" + route[idx2]["name:string[]"]
                 for aa in apt[idx]:
                     tl_aa = translate_keys(stardp_fields, aa)
                     # print(route)
                     if f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}" not in routes:
-                        route[-1]["name:string[]"] = [route[-1]["name:string[]"]] if type(route[-1]["name:string[]"]) == str else route[-1]["name:string[]"]
+                        route[-1]["distance:double"] = "1.00"
                         route[-1][":END_ID"] = tl_aa[':START_ID']
                         routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"] = route[-1]
                     elif route[-1]["name:string[]"] not in routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"]:
-                        routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"].append(route[-1]["name:string[]"])
+                        routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"] += ";" + route[-1]["name:string[]"]
 
     writer.writerows(routes.values())

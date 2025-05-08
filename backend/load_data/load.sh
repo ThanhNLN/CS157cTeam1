@@ -22,5 +22,5 @@ fi
 echo "Loading database"
 
 neo4j stop && \
-neo4j-admin database import full neo4j --overwrite-destination --nodes=NAVAID.csv --relationships=AIRWAY.csv && \
+neo4j-admin database import full neo4j --overwrite-destination --nodes=NAVAID.csv --relationships=AIRWAY.csv --verbose && \
 neo4j start
