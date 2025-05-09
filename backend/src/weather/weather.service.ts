@@ -93,7 +93,9 @@ export class WeatherService {
         UNWIND $weatherData AS weather
         MATCH (n:NAVAID)
         WHERE abs(n.latitude - weather.latitude) <= 0.5 AND abs(n.longitude - weather.longitude) <= 0.5
-        WITH n.distance * weather.weatherCost AS distWeatherCost
+        CALL (n, weather) {
+          RETURN (n.distance * weather.weatherCost) AS distWeatherCost
+        }
         SET n.distanceWeatherCost = distWeatherCost
         SET n.weatherCost = weather.weatherCost
         SET n.weatherCode = weather.weatherCode
