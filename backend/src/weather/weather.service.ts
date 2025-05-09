@@ -49,7 +49,43 @@ export class WeatherService {
           windSpeed: data.hourly.wind_speed_180m[0],
           weatherCost: 0,
         };
-        weather.weatherCost = 0; // TODO: set weatherCost here
+        
+        // Weather Cost is a multiplier.
+        if (weather.weatherCode <= 17) {
+          weather.weatherCost = 1; // Fine weather for flying
+        } else if (weather.weatherCode <= 19) {
+          weather.weatherCost = 1.3; // caution?
+        } else if (weather.weatherCode <= 25) {
+          weather.weatherCost = 1.15; // rain, it's okay
+        } else if (weather.weatherCode <= 29) {
+          weather.weatherCost = 5; // Icing risk, probably nogo.
+        } else if (weather.weatherCode <= 32) {
+          weather.weatherCost = 1.1; // Sand
+        } else if (weather.weatherCode <= 35) {
+          weather.weatherCost = 1.5; // Severe sand
+        } else if (weather.weatherCode <= 41) {
+          weather.weatherCost = 1.2; // Snow but not snowing
+        } else if (weather.weatherCode <= 47) {
+          weather.weatherCost = 1.5; // fog
+        } else if (weather.weatherCode <= 49) {
+          weather.weatherCost = 50; // I think you want to live, right? ICING
+        } else if (weather.weatherCode <= 53) {
+          weather.weatherCost = 1.05; // light rain
+        } else if (weather.weatherCode <= 55) {
+          weather.weatherCost = 1.1; // rain
+        } else if (weather.weatherCode <= 57) {
+          weather.weatherCost = 50; // freezing rain ICING
+        } else if (weather.weatherCode <= 65) {
+          weather.weatherCost = 1.15; // rain
+        } else if (weather.weatherCode <= 79) {
+          weather.weatherCost = 50; // ICING
+        } else if (weather.weatherCode <= 81) {
+          weather.weatherCost = 1.15; // rain
+        } else if (weather.weatherCode <= 99) {
+          weather.weatherCost = 50; // ICING
+        } else {
+          weather.weatherCost = 100;
+        }
         return weather;
       });
 
@@ -57,6 +93,8 @@ export class WeatherService {
         UNWIND $weatherData AS weather
         MATCH (n:NAVAID)
         WHERE abs(n.latitude - weather.latitude) <= 0.5 AND abs(n.longitude - weather.longitude) <= 0.5
+        WITH n.distance * weather.weatherCost AS distWeatherCost
+        SET n.distanceWeatherCost = distWeatherCost
         SET n.weatherCost = weather.weatherCost
         SET n.weatherCode = weather.weatherCode
         SET n.cloudCover = weather.cloudCover
