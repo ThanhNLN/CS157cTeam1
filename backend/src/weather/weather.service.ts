@@ -106,6 +106,25 @@ export class WeatherService {
         weatherData: transformedWeatherData,
       });
       await delay(11000);
+
+      const deleteProjectedGraphQuery = `
+        CALL gds.graph.drop('airways') YIELD graphName;
+      `;
+
+      await this.neo4jService.write(deleteProjectedGraphQuery);
+      await delay(5000)
+
+      const projectGraphQuery = `
+        MATCH (source:NAVAID)-[r:AIRWAY_ROUTE]-(target:NAVAID)
+        RETURN gds.graph.project(
+          'airways',
+          source,
+          target,
+          { relationshipProperties: r { .distanceWeatherCost } }
+        )
+      `;
+      await this.neo4jService.write(projectGraphQuery);
+      await delay(5000)
     }
   }
 }
