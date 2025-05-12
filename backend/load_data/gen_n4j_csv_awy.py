@@ -57,8 +57,12 @@ field_names = {
     "GNSS_MEA_DIR": "gnssMeaDir",
     "GNSS_MEA_OPP": "gnssMeaOpp",
     # Extras
+    "NAVAID_LAT": "latitudeFrom",
+    "NAVAID_LONG": "longitudeFrom",
     "EXTRA1": ":END_ID",
-    "EXTRA2": ":TYPE"
+    "EXTRA2": ":TYPE",
+    "EXTRA3": "midpointLatitude:double",
+    "EXTRA4": "midpointLongitude:double",
 }
 
 stardp_fields = {
@@ -112,6 +116,7 @@ with open("AIRWAY.csv", "w+") as airway_file:
             if not data["D_NEXT_PT_NM"]:
                 data["D_NEXT_PT_NM"] = 5.00 # some weight
             tl_data = translate_keys(field_names, data)
+            if tl_data[":START_ID"] in ["U.S. MEXICAN BORDER", "U.S. CANADIAN BORDER", "U.S.CANADIAN BORDER"]: continue
             tl_data[":TYPE"] = "AIRWAY_ROUTE"
             if f"{awy_id}_{awy_type}" in tl_data_dict:
                 tl_data_dict[f"{awy_id}_{awy_type}"].append((awy_seq_num, tl_data))
@@ -126,6 +131,8 @@ with open("AIRWAY.csv", "w+") as airway_file:
         cur_route_with_end_id = [cur_route[0][1]] # load first
         for seq_num, vals in cur_route[1:]:
             cur_route_with_end_id[-1][":END_ID"] = vals[":START_ID"]
+            cur_route_with_end_id[-1]["midpointLatitude:double"] = (cur_route_with_end_id[-1]["latitudeFrom"] + vals["latitudeFrom"]) / 2
+            cur_route_with_end_id[-1]["midpointLongitude:double"] = (cur_route_with_end_id[-1]["longitudeFrom"] + vals["longitudeFrom"]) / 2
             cur_route_with_end_id.append(vals)
         cur_route_with_end_id.pop() # remove last one.
         for r in cur_route_with_end_id:
@@ -151,16 +158,20 @@ with open("AIRWAY.csv", "w+") as airway_file:
                     if f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}" not in routes:
                         route[idx2]["distance:double"] = calc_dist(route[idx2], route[idx2+1])#"1.00"
                         route[idx2][":END_ID"] = route[idx2+1][':START_ID']
+                        route[idx2]["midpointLatitude:double"] = (route[idx2]["latitudeFrom"] + route[idx2+1]["latitudeFrom"]) / 2
+                        route[idx2]["midpointLongitude:double"] = (route[idx2]["longitudeFrom"] + route[idx2+1]["longitudeFrom"]) / 2
                         routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"] = route[idx2].copy()
                     elif route[idx2]["name:string[]"] not in routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"]["name:string[]"]:
                         routes[f"{route[idx2][':START_ID']}_{route[idx2+1][':START_ID']}"]["name:string[]"] += ";" + route[idx2]["name:string[]"]
                 for aa in apt[idx]:
                     tl_aa = translate_keys(stardp_fields, aa)
                     # print(route)
-                    if route[-1]["name:string[]"][0] == "S":
+                    if route[-1]["name:string[]"][0] == "S": # arrival
                         if f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}" not in routes:
                             route[-1]["distance:double"] = calc_dist(route[-1], tl_aa) #"1.00"
                             route[-1][":END_ID"] = tl_aa[':START_ID']
+                            route[-1]["midpointLatitude:double"] = (route[-1]["latitudeFrom"] + tl_aa["latitudeFrom"]) / 2
+                            route[-1]["midpointLongitude:double"] = (route[-1]["longitudeFrom"] + tl_aa["longitudeFrom"]) / 2
                             routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"] = route[-1].copy()
                         elif route[-1]["name:string[]"] not in routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"]:
                             routes[f"{route[-1][':START_ID']}_{tl_aa[':START_ID']}"]["name:string[]"] += ";" + route[-1]["name:string[]"]
@@ -168,6 +179,8 @@ with open("AIRWAY.csv", "w+") as airway_file:
                         if f"{tl_aa[':START_ID']}_{route[0][':START_ID']}" not in routes:
                             route[0]["distance:double"] = calc_dist(tl_aa, route[0]) #"1.00"
                             route[0][":END_ID"] = tl_aa[':START_ID']
+                            route[0]["midpointLatitude:double"] = (route[0]["latitudeFrom"] + tl_aa["latitudeFrom"]) / 2
+                            route[0]["midpointLongitude:double"] = (route[0]["longitudeFrom"] + tl_aa["longitudeFrom"]) / 2
                             routes[f"{tl_aa[':START_ID']}_{route[0][':START_ID']}"] = route[0].copy()
                         elif route[0]["name:string[]"] not in routes[f"{tl_aa[':START_ID']}_{route[0][':START_ID']}"]["name:string[]"]:
                             routes[f"{tl_aa[':START_ID']}_{route[0][':START_ID']}"]["name:string[]"] += ";" + route[0]["name:string[]"]
@@ -181,6 +194,8 @@ with open("AIRWAY.csv", "w+") as airway_file:
                         if f"{route2[idx3][':START_ID']}_{route2[idx3+1][':START_ID']}" not in routes:
                             route2[idx3]["distance:double"] = calc_dist(route2[idx3], route2[idx3+1]) # "1.00"
                             route2[idx3][":END_ID"] = route2[idx3+1][':START_ID']
+                            route2[idx3]["midpointLatitude:double"] = (route2[idx3]["latitudeFrom"] + route2[idx3+1]["latitudeFrom"]) / 2
+                            route2[idx3]["midpointLongitude:double"] = (route2[idx3]["longitudeFrom"] + route2[idx3+1]["longitudeFrom"]) / 2
                             routes[f"{route2[idx3][':START_ID']}_{route2[idx3+1][':START_ID']}"] = route2[idx3].copy()
                         elif route2[idx3]["name:string[]"] not in routes[f"{route2[idx3][':START_ID']}_{route2[idx3+1][':START_ID']}"]["name:string[]"]:
                             routes[f"{route2[idx3][':START_ID']}_{route2[idx3+1][':START_ID']}"]["name:string[]"] += ";" + route2[idx3]["name:string[]"]
