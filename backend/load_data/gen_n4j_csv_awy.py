@@ -77,7 +77,7 @@ def calc_dist(p1, p2):
     if HAS_GEOPY:
         return geopy.distance.distance((p1["latitudeFrom"], p1["longitudeFrom"]), (p2["latitudeFrom"], p2["longitudeFrom"])).nm
     else:
-        R = 3,443.8 # nautical miles
+        R = 3443.8 # nautical miles
 
         lat1 = radians(p1["latitudeFrom"])
         lon1 = radians(p1["longitudeFrom"])
