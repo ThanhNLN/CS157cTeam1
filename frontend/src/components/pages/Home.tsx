@@ -1,13 +1,29 @@
+import { useMutation } from "@tanstack/react-query";
 import Map from "../organisms/Map";
+import Navbar from "../organisms/Navbar";
 import Sidebar from "../organisms/Sidebar";
+import { getPath } from "../../services/pathfinder";
 
 export default function Home() {
-  const markers = [{ lat: 22.54992, lng: 0 }];
+  const { mutate, data, isPending } = useMutation({
+    mutationKey: ["route"],
+    mutationFn: async ({ from, to }: { from: string; to: string }) =>
+      await getPath(from, to),
+  });
+
+  const markers =
+    data?.path.map((marker) => ({
+      lng: marker.longitude,
+      lat: marker.latitude,
+      name: marker.navaidId,
+    })) ?? [];
+
   return (
     <>
-      <div className="h-screen w-full">
+      <Navbar />
+      <div className="h-[calc(100vh-50px)]">
         <Map markers={markers} />
-        <Sidebar />
+        <Sidebar mutate={mutate} />
       </div>
     </>
   );

@@ -1,8 +1,21 @@
+import { UseMutateFunction } from "@tanstack/react-query";
 import { useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import Dropdown from "../molecules/Dropdown";
+import TextInput from "../molecules/Dropdown";
 
-export default function Sidebar() {
+interface SidebarProps {
+  mutate: UseMutateFunction<
+    any,
+    Error,
+    {
+      from: string;
+      to: string;
+    },
+    unknown
+  >;
+}
+
+export default function Sidebar({ mutate }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -19,19 +32,10 @@ export default function Sidebar() {
       >
         {isOpen ? <IoIosArrowForward /> : <IoIosArrowBack />}
       </div>
-      <div className="py-4">
-        <Dropdown
-          text="Where from?"
-          options={[]}
-          selected={from}
-          setSelected={setFrom}
-        />
-        <Dropdown
-          text="Where to?"
-          options={[]}
-          selected={to}
-          setSelected={setTo}
-        />
+      <div className="py-4 flex flex-col gap-2">
+        <TextInput prompt="Where from?" text={from} setText={setFrom} />
+        <TextInput prompt="Where to?" text={to} setText={setTo} />
+        <button onClick={() => mutate({ from, to })}>Navigate</button>
       </div>
     </div>
   );

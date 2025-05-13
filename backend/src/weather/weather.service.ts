@@ -18,7 +18,29 @@ export class WeatherService {
     return chunks;
   }
 
-  @Cron('* * * * *')
+  async reloadProjection() {
+    const deleteProjectedGraphQuery = `
+      CALL gds.graph.exists('airways') YIELD exists
+      WITH exists
+      WHERE exists
+      CALL gds.graph.drop('airways') YIELD graphName
+      RETURN graphName;
+
+    `;
+    await this.neo4jService.write(deleteProjectedGraphQuery);
+
+    const projectGraphQuery = `
+      CALL gds.graph.project.cypher(
+        'airways',
+        'MATCH (n:NAVAID) RETURN id(n) AS id',
+        'MATCH (a:NAVAID)-[r:AIRWAY_ROUTE]->(b:NAVAID) RETURN id(a) AS source, id(b) AS target, r.distance + coalesce(r.distWeatherCost, 0) AS totalCost'
+      )
+      YIELD graphName, nodeCount, relationshipCount
+    `;
+    await this.neo4jService.write(projectGraphQuery);
+  }
+
+  // @Cron('* * * * *')
   async syncWeatherData() {
     const locations: { lat: number; long: number }[] = [];
     for (let lon = -125; lon <= -67; lon++) {
@@ -31,11 +53,15 @@ export class WeatherService {
     const delay = (ms: number) =>
       new Promise((resolve) => setTimeout(resolve, ms));
 
-    for (const chunk of chunks) {
+    for (const [index, chunk] of chunks.entries()) {
+      console.log(`Processing weather chunk ${index} of ${chunks.length}`);
       const weatherData = await this.weatherHttpService.getWeatherData(chunk);
 
       if (weatherData.error) {
-        console.error('Error fetching weather data:', weatherData.error);
+        console.error(
+          `Error fetching weather data for chunk ${index}:`,
+          weatherData.error,
+        );
         return;
       }
 
@@ -49,7 +75,7 @@ export class WeatherService {
           windSpeed: data.hourly.wind_speed_180m[0],
           weatherCost: 0,
         };
-        
+
         // Weather Cost is a multiplier.
         if (weather.weatherCode <= 17) {
           weather.weatherCost = 1; // Fine weather for flying
@@ -90,43 +116,26 @@ export class WeatherService {
       });
 
       const query = `
-        UNWIND $weatherData AS weather
-        MATCH (n:NAVAID)
-        WHERE abs(n.latitude - weather.latitude) <= 0.5 AND abs(n.longitude - weather.longitude) <= 0.5
-        CALL (n, weather) {
-          RETURN (n.distance * weather.weatherCost) AS distWeatherCost
-        }
-        SET n.distanceWeatherCost = distWeatherCost
-        SET n.weatherCost = weather.weatherCost
-        SET n.weatherCode = weather.weatherCode
-        SET n.cloudCover = weather.cloudCover
-        SET n.temperature = weather.temperature
-        SET n.windSpeed = weather.windSpeed
+      UNWIND $weatherData AS weather
+      MATCH (r:AIRWAY_ROUTE)
+      WHERE abs(r.midpointLatitude - weather.latitude) <= 0.5 AND abs(r.midpointLongitude - weather.longitude) <= 0.5
+      CALL (r, weather) {
+        RETURN (r.distance * weather.weatherCost) AS distWeatherCost
+      }
+      SET r.distanceWeatherCost = distWeatherCost
+      SET r.weatherCost = weather.weatherCost
+      SET r.weatherCode = weather.weatherCode
+      SET r.cloudCover = weather.cloudCover
+      SET r.temperature = weather.temperature
+      SET r.windSpeed = weather.windSpeed
       `;
 
       await this.neo4jService.write(query, {
         weatherData: transformedWeatherData,
       });
       await delay(11000);
-
-      const deleteProjectedGraphQuery = `
-        CALL gds.graph.drop('airways') YIELD graphName;
-      `;
-
-      await this.neo4jService.write(deleteProjectedGraphQuery);
-      await delay(5000)
-
-      const projectGraphQuery = `
-        MATCH (source:NAVAID)-[r:AIRWAY_ROUTE]-(target:NAVAID)
-        RETURN gds.graph.project(
-          'airways',
-          source,
-          target,
-          { relationshipProperties: r { .distanceWeatherCost } }
-        )
-      `;
-      await this.neo4jService.write(projectGraphQuery);
-      await delay(5000)
     }
+
+    await this.reloadProjection();
   }
 }

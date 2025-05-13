@@ -9,3 +9,7 @@
 #GMapsID div div a div img {
   display: none;
 }
+
+body {
+  overflow: hidden;
+}

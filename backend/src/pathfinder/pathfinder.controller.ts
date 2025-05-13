@@ -1,9 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { PathfinderService } from './pathfinder.service';
 
 @Controller('pathfinder')
 export class PathfinderController {
-  @Get()
-  getPath(): string {
-    return 'This action returns all pathfinder resources';
+  constructor(private readonly pathfinderService: PathfinderService) {}
+
+  @Post('/')
+  async getPath(@Body('from') from: string, @Body('to') to: string) {
+    return await this.pathfinderService.findPath(from, to);
   }
 }

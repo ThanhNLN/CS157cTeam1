@@ -8,4 +8,11 @@ import { ScheduleModule } from '@nestjs/schedule';
   imports: [Neo4jModule, WeatherHttpModule, ScheduleModule.forRoot()],
   providers: [WeatherService],
 })
-export class WeatherModule {}
+export class WeatherModule {
+  constructor(private readonly weatherService: WeatherService) {}
+
+  async onModuleInit() {
+    await this.weatherService.reloadProjection();
+    // await this.weatherService.syncWeatherData();
+  }
+}
