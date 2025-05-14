@@ -64,6 +64,8 @@ field_names = {
     "EXTRA3": "midpointLatitude:double",
     "EXTRA4": "midpointLongitude:double",
     "EXTRA5": "distanceWeatherCost:double",
+    "EXTRA6": "fromNavaid",
+    "EXTRA7": "toNavaid",
 }
 
 stardp_fields = {
@@ -214,4 +216,6 @@ with open("AIRWAY.csv", "w+") as airway_file:
                     #         routes[f"{route2[-1][':START_ID']}_{route[0][':START_ID']}"]["name:string[]"] += ";" + route[-1]["name:string[]"]
     for route in routes:
         routes[route]["distanceWeatherCost:double"] = routes[route]["distance:double"] # fix issues
+        routes[route]["fromNavaid"] = routes[route][":START_ID"]
+        routes[route]["toNavaid"] = routes[route][":END_ID"]
     writer.writerows(routes.values())
