@@ -67,6 +67,7 @@ with open("AWY.txt", "r+", encoding="ISO8859-1") as faa_data:
             line_item["NAVAID_LAT"] = latlong_conv(line[83:97].rstrip().strip())
             line_item["NAVAID_LONG"] = latlong_conv(line[97:111].rstrip().strip())
             line_item["MRA"] = line[111:116].rstrip().strip()
+            line_item["NAVAID_ID"] = line[116:120].rstrip().strip()
         # remove fields that are not present.
         to_delete = []
         for k in line_item:

@@ -70,6 +70,8 @@ with open("NAVAID.csv", "w+") as navaid_file:
         awy_data = json.load(awy_file)
         tl_data_list = []
         for data in awy_data.values():
+            if "NAVAID_ID" in data and data["NAVAID_ID"]:
+                data["NAVAID_NAME"] = data["NAVAID_ID"]
             tl_data = translate_keys(field_names, data)
             tl_data[':LABEL'] = 'NAVAID;AWY'
             if tl_data["navaidId:ID"] in tl_data_dict:

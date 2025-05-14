@@ -116,6 +116,8 @@ with open("AIRWAY.csv", "w+") as airway_file:
                 data["D_NEXT_PT_NM"] = float(data["D_NEXT_PT"]) if data["D_NEXT_PT"] else ""
             if not data["D_NEXT_PT_NM"]:
                 data["D_NEXT_PT_NM"] = -1
+            if "NAVAID_ID" in data and data["NAVAID_ID"]:
+                data["NAVAID_NAME"] = data["NAVAID_ID"]
             tl_data = translate_keys(field_names, data)
             if tl_data[":START_ID"] in ["U.S. MEXICAN BORDER", "U.S. CANADIAN BORDER", "U.S.CANADIAN BORDER"]: continue
             tl_data[":TYPE"] = "AIRWAY_ROUTE"
