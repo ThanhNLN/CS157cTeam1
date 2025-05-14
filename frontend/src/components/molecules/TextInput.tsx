@@ -7,7 +7,7 @@ interface TextInputProps {
 export default function TextInput({ prompt, text, setText }: TextInputProps) {
   return (
     <>
-      <div>
+      <div className="w-full">
         <div>{prompt}</div>
         <div className="border-2 border-gray-400 rounded-md p-2">
           <input

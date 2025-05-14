@@ -1,7 +1,7 @@
 import { UseMutateFunction } from "@tanstack/react-query";
 import { useState } from "react";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import TextInput from "../molecules/Dropdown";
+import TextInput from "../molecules/TextInput";
 
 interface SidebarProps {
   mutate: UseMutateFunction<
@@ -13,9 +13,17 @@ interface SidebarProps {
     },
     unknown
   >;
+  isPending: boolean;
+  isError: boolean;
+  isSuccess: boolean;
 }
 
-export default function Sidebar({ mutate }: SidebarProps) {
+export default function Sidebar({
+  mutate,
+  isPending,
+  isError,
+  isSuccess,
+}: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -32,10 +40,24 @@ export default function Sidebar({ mutate }: SidebarProps) {
       >
         {isOpen ? <IoIosArrowForward /> : <IoIosArrowBack />}
       </div>
-      <div className="py-4 flex flex-col gap-2">
+      <div className="py-4 flex flex-col gap-4 flex-1 pr-6">
         <TextInput prompt="Where from?" text={from} setText={setFrom} />
         <TextInput prompt="Where to?" text={to} setText={setTo} />
-        <button onClick={() => mutate({ from, to })}>Navigate</button>
+        <button
+          className={`${
+            isPending ? "bg-gray-300" : isError ? "bg-red-500" : "bg-amber-300"
+          } p-2 rounded-md`}
+          onClick={() => mutate({ from, to })}
+          disabled={isPending}
+        >
+          {isPending
+            ? "Loading..."
+            : isError
+            ? "One of your destinations doesn't exist."
+            : isSuccess
+            ? "Success!"
+            : "Navigate"}
+        </button>
       </div>
     </div>
   );
