@@ -5,25 +5,34 @@ import Sidebar from "../organisms/Sidebar";
 import { getPath } from "../../services/pathfinder";
 
 export default function Home() {
-  const { mutate, data, isPending } = useMutation({
+  const { mutate, data, isPending, isSuccess } = useMutation({
     mutationKey: ["route"],
     mutationFn: async ({ from, to }: { from: string; to: string }) =>
       await getPath(from, to),
   });
 
+  const error = data?.code == 500;
+
   const markers =
-    data?.path.map((marker) => ({
-      lng: marker.longitude,
-      lat: marker.latitude,
-      name: marker.navaidId,
-    })) ?? [];
+    data?.code == 500
+      ? []
+      : data?.path.map((marker) => ({
+          lng: marker.longitude,
+          lat: marker.latitude,
+          name: marker.navaidId,
+        })) ?? [];
 
   return (
     <>
       <Navbar />
       <div className="h-[calc(100vh-50px)]">
         <Map markers={markers} />
-        <Sidebar mutate={mutate} />
+        <Sidebar
+          mutate={mutate}
+          isPending={isPending}
+          isError={error}
+          isSuccess={isSuccess}
+        />
       </div>
     </>
   );

@@ -20,23 +20,15 @@ export class WeatherService {
 
   async reloadProjection() {
     const deleteProjectedGraphQuery = `
-      CALL gds.graph.exists('airways') YIELD exists
-      WITH exists
-      WHERE exists
-      CALL gds.graph.drop('airways') YIELD graphName
-      RETURN graphName;
+        CALL gds.graph.exists('airways') YIELD exists
+        WITH exists
+        WHERE exists
+        CALL gds.graph.drop('airways') YIELD graphName
+        RETURN graphName;
 
     `;
     await this.neo4jService.write(deleteProjectedGraphQuery);
 
-    // const projectGraphQuery = `
-    //   CALL gds.graph.project.cypher(
-    //     'airways',
-    //     'MATCH (n:NAVAID) RETURN id(n) AS id',
-    //     'MATCH (a:NAVAID)-[r:AIRWAY_ROUTE]->(b:NAVAID) RETURN id(a) AS source, id(b) AS target, coalesce(r.distWeatherCost, r.distance) AS totalCost'
-    //   )
-    //   YIELD graphName, nodeCount, relationshipCount
-    // `;
     const projectGraphQuery = `
       MATCH (source:NAVAID)-[r:AIRWAY_ROUTE]-(target:NAVAID)
       RETURN gds.graph.project(
@@ -45,7 +37,7 @@ export class WeatherService {
         target,
         { relationshipProperties: r { .distanceWeatherCost } }
       )
-    `
+    `;
     await this.neo4jService.write(projectGraphQuery);
   }
 
