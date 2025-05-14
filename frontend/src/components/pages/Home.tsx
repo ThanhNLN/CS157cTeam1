@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import Map from "../organisms/Map";
 import Navbar from "../organisms/Navbar";
 import Sidebar from "../organisms/Sidebar";
-import { getPath } from "../../services/pathfinder";
+import { getPath, getPathNoWeather } from "../../services/pathfinder";
 import { useEffect } from "react";
 
 export default function Home() {
@@ -23,9 +23,9 @@ export default function Home() {
     isPending: noWeatherIsPending,
     isSuccess: noWeatherIsSuccess,
   } = useMutation({
-    mutationKey: ["route"],
+    mutationKey: ["routeNoWeather"],
     mutationFn: async ({ from, to }: { from: string; to: string }) =>
-      await getPath(from, to),
+      await getPathNoWeather(from, to),
   });
 
   const error = weatherData?.code == 500 || noWeatherData?.code == 500;

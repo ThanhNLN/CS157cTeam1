@@ -51,7 +51,6 @@ export class PathfinderService {
   }
 
   async findPathNoWeather(from: string, to: string) {
-    console.log('no weather');
     const query = `
       MATCH (source:NAVAID {navaidId: '${from}'}), (target:NAVAID {navaidId: '${to}'})
           CALL gds.shortestPath.dijkstra.stream('airways', {
