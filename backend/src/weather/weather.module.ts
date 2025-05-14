@@ -12,7 +12,7 @@ export class WeatherModule {
   constructor(private readonly weatherService: WeatherService) {}
 
   async onModuleInit() {
-    await this.weatherService.reloadProjection();
     // await this.weatherService.syncWeatherData();
+    await this.weatherService.reloadProjection();
   }
 }

@@ -8,14 +8,25 @@ from enum import Enum
 
 
 # Convert from degrees, minutes, seconds to floats
-def latlong_conv(s: str) -> float:
+def lat_conv(s: str) -> float:
     if not s:
         return ""
     deg = s[1:3]
     min = s[3:5]
     sec = s[5:8]
     dir = s[0]
-    val = (float(deg) + float(min)/60 + float(sec)/(60*60)) * (-1 if dir in ['W', 'S'] else 1)
+    val = (float(deg) + float(min)/60 + float(sec)/(60*60*10)) * (-1 if dir in ['W', 'S'] else 1)
+    return (math.floor(val * 10**6) / 10**6) # we don't need *that* much precision
+
+# Convert from degrees, minutes, seconds to floats
+def long_conv(s: str) -> float:
+    if not s:
+        return ""
+    deg = s[1:4]
+    min = s[4:6]
+    sec = s[6:9]
+    dir = s[0]
+    val = (float(deg) + float(min)/60 + float(sec)/(60*60*10)) * (-1 if dir in ['W', 'S'] else 1)
     return (math.floor(val * 10**6) / 10**6) # we don't need *that* much precision
 
 def fix_datetime(s: str) -> str:
@@ -40,8 +51,8 @@ with open("STARDP.txt", "r+", encoding="ISO8859-1") as faa_data:
         if line[0] in ["S", "D"]:
             line_item["ID"] = line[0:5].rstrip().strip()
             line_item["TYPE"] = line[10:12].rstrip().strip()
-            line_item["NAVAID_LAT"] = latlong_conv(line[13:21].rstrip().strip())
-            line_item["NAVAID_LONG"] = latlong_conv(line[21:30].rstrip().strip())
+            line_item["NAVAID_LAT"] = lat_conv(line[13:21].rstrip().strip())
+            line_item["NAVAID_LONG"] = long_conv(line[21:30].rstrip().strip())
             line_item["NAVAID_ID"] = line[30:36].rstrip().strip()
             line_item["STARDP_CODE"] = line[38:51].rstrip().strip()
             line_item["TRANSITION_NAME"] = line[51:161].rstrip().strip()

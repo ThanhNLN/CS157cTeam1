@@ -63,6 +63,7 @@ field_names = {
     "EXTRA2": ":TYPE",
     "EXTRA3": "midpointLatitude:double",
     "EXTRA4": "midpointLongitude:double",
+    "EXTRA5": "distanceWeatherCost:double",
 }
 
 stardp_fields = {
@@ -114,7 +115,7 @@ with open("AIRWAY.csv", "w+") as airway_file:
             if not data["D_NEXT_PT_NM"]:
                 data["D_NEXT_PT_NM"] = float(data["D_NEXT_PT"]) if data["D_NEXT_PT"] else ""
             if not data["D_NEXT_PT_NM"]:
-                data["D_NEXT_PT_NM"] = 5.00 # some weight
+                data["D_NEXT_PT_NM"] = -1
             tl_data = translate_keys(field_names, data)
             if tl_data[":START_ID"] in ["U.S. MEXICAN BORDER", "U.S. CANADIAN BORDER", "U.S.CANADIAN BORDER"]: continue
             tl_data[":TYPE"] = "AIRWAY_ROUTE"
@@ -133,6 +134,8 @@ with open("AIRWAY.csv", "w+") as airway_file:
             cur_route_with_end_id[-1][":END_ID"] = vals[":START_ID"]
             cur_route_with_end_id[-1]["midpointLatitude:double"] = (cur_route_with_end_id[-1]["latitudeFrom"] + vals["latitudeFrom"]) / 2
             cur_route_with_end_id[-1]["midpointLongitude:double"] = (cur_route_with_end_id[-1]["longitudeFrom"] + vals["longitudeFrom"]) / 2
+            if cur_route_with_end_id[-1]["distance:double"] == -1:
+                cur_route_with_end_id[-1]["distance:double"] = calc_dist(cur_route_with_end_id[-1], vals)
             cur_route_with_end_id.append(vals)
         cur_route_with_end_id.pop() # remove last one.
         for r in cur_route_with_end_id:
@@ -207,4 +210,6 @@ with open("AIRWAY.csv", "w+") as airway_file:
                     #         routes[f"{route2[-1][':START_ID']}_{route[0][':START_ID']}"] = route2[-1]
                     #     elif route2[-1]["name:string[]"] not in routes[f"{route2[-1][':START_ID']}_{route[0][':START_ID']}"]["name:string[]"]:
                     #         routes[f"{route2[-1][':START_ID']}_{route[0][':START_ID']}"]["name:string[]"] += ";" + route[-1]["name:string[]"]
+    for route in routes:
+        routes[route]["distanceWeatherCost:double"] = routes[route]["distance:double"] # fix issues
     writer.writerows(routes.values())

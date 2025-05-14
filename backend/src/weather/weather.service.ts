@@ -29,14 +29,23 @@ export class WeatherService {
     `;
     await this.neo4jService.write(deleteProjectedGraphQuery);
 
+    // const projectGraphQuery = `
+    //   CALL gds.graph.project.cypher(
+    //     'airways',
+    //     'MATCH (n:NAVAID) RETURN id(n) AS id',
+    //     'MATCH (a:NAVAID)-[r:AIRWAY_ROUTE]->(b:NAVAID) RETURN id(a) AS source, id(b) AS target, coalesce(r.distWeatherCost, r.distance) AS totalCost'
+    //   )
+    //   YIELD graphName, nodeCount, relationshipCount
+    // `;
     const projectGraphQuery = `
-      CALL gds.graph.project.cypher(
+      MATCH (source:NAVAID)-[r:AIRWAY_ROUTE]-(target:NAVAID)
+      RETURN gds.graph.project(
         'airways',
-        'MATCH (n:NAVAID) RETURN id(n) AS id',
-        'MATCH (a:NAVAID)-[r:AIRWAY_ROUTE]->(b:NAVAID) RETURN id(a) AS source, id(b) AS target, r.distance + coalesce(r.distWeatherCost, 0) AS totalCost'
+        source,
+        target,
+        { relationshipProperties: r { .distanceWeatherCost } }
       )
-      YIELD graphName, nodeCount, relationshipCount
-    `;
+    `
     await this.neo4jService.write(projectGraphQuery);
   }
 
@@ -117,23 +126,25 @@ export class WeatherService {
 
       const query = `
       UNWIND $weatherData AS weather
-      MATCH (r:AIRWAY_ROUTE)
+      MATCH (:NAVAID)-[r:AIRWAY_ROUTE]-(:NAVAID)
       WHERE abs(r.midpointLatitude - weather.latitude) <= 0.5 AND abs(r.midpointLongitude - weather.longitude) <= 0.5
-      CALL (r, weather) {
-        RETURN (r.distance * weather.weatherCost) AS distWeatherCost
+      UNWIND r as rs
+      CALL (rs, weather) {
+        RETURN (rs.distance * weather.weatherCost) AS distWeatherCost
       }
-      SET r.distanceWeatherCost = distWeatherCost
-      SET r.weatherCost = weather.weatherCost
-      SET r.weatherCode = weather.weatherCode
-      SET r.cloudCover = weather.cloudCover
-      SET r.temperature = weather.temperature
-      SET r.windSpeed = weather.windSpeed
+      SET rs.distanceWeatherCost = distWeatherCost
+      SET rs.weatherCost = weather.weatherCost
+      SET rs.weatherCode = weather.weatherCode
+      SET rs.cloudCover = weather.cloudCover
+      SET rs.temperature = weather.temperature
+      SET rs.windSpeed = weather.windSpeed;
       `;
 
       await this.neo4jService.write(query, {
         weatherData: transformedWeatherData,
       });
-      await delay(11000);
+      // console.log(transformedWeatherData);
+      await delay(10000);
     }
 
     await this.reloadProjection();

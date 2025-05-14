@@ -57,6 +57,7 @@ with open("NAVAID.csv", "w+") as navaid_file:
     with open("FIX.json", "r+", encoding="utf-8") as fix_file:
         fix_data = json.load(fix_file)
         for data in fix_data:
+            if data["USE"].startswith("MIL-"): continue
             tl_data = translate_keys(field_names, data)
             tl_data["fixType"] = data["TYPE"]
             tl_data[':LABEL'] = 'NAVAID;FIX'
@@ -107,5 +108,4 @@ with open("NAVAID.csv", "w+") as navaid_file:
                         else:
                             tl_data_dict[tl_data["navaidId:ID"]] = tl_data
                     
-
     writer.writerows(tl_data_dict.values())
