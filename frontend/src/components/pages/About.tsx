@@ -14,22 +14,36 @@ export default function About() {
 
         {/* General description about the application */}
         <p className="about-paragraph">
-          AERONAV is a smart flight planning assistant designed for private pilots.
-          It helps visualize optimized flight routes based on real-time weather, air traffic data,
-          and intelligent pathfinding.
+          AERONAV is a smart flight planning assistant designed for private
+          pilots. It helps visualize optimized flight routes based on real-time
+          weather, air traffic data, and intelligent pathfinding.
         </p>
 
         {/* List of key features and technologies used */}
         <ul className="about-list">
-          <li>Graph-based flight routing powered by Neo4j</li>
-          <li>Live weather overlays using aviation APIs</li>
-          <li>Real-time air traffic integration</li>
-          <li>Built with React (TypeScript) and Node.js backend</li>
+          <li>
+            ✈️ Graph-based flight routing using Neo4j (waypoints = nodes, routes
+            = edges)
+          </li>
+          <li>
+            🌦️ Real-time weather data is fetched and matched to routes based on
+            midpoint proximity (within 0.5° lat/lon)
+          </li>
+          <li>
+            📡 FAA airspace/navigation data is pulled and loaded into the system
+            regularly
+          </li>
+          <li>
+            🧠 Pathfinding algorithms (e.g., Dijkstra) compute optimal routes
+            with weather awareness
+          </li>
+          <li>💻 Built with React (TypeScript) frontend and Node.js backend</li>
         </ul>
 
         {/* Credit or course reference */}
         <p className="about-paragraph">
-          Developed by <strong>Team 1</strong> for <em>CS157C</em> at San Jose State University.
+          Developed by <strong>Team 1</strong> for <em>CS157C</em> at San Jose
+          State University.
         </p>
       </div>
     </>
