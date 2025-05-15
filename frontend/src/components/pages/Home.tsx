@@ -59,10 +59,6 @@ export default function Home() {
     <>
       <Navbar />
       <div className="h-[calc(100vh-50px)]">
-        <Map
-          weatherMarkers={weatherMarkers}
-          noWeatherMarkers={noWeatherMarkers}
-        />
         <Sidebar
           mutate={(from, to) => {
             weatherMutate(from, to);
@@ -72,6 +68,10 @@ export default function Home() {
           isError={error}
           isSuccess={weatherIsSuccess}
           defaultOpen={sidebarOpenFromLanding}
+        />
+        <Map
+          weatherMarkers={weatherMarkers}
+          noWeatherMarkers={noWeatherMarkers}
         />
       </div>
     </>

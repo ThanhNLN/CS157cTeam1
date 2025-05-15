@@ -36,7 +36,7 @@ export default function Sidebar({
       className={`bg-white w-1/4 h-full absolute top-0 ${
         // isOpen ? "left-0" : "-left-[calc(25%-8px-16px)]" // opens from the LEFT instead of the right
         isOpen ? "right-0" : "-right-[calc(25%-8px-16px)]"
-      } z-10 flex transition-all duration-300 shadow-xl`}
+      } z-5 flex transition-all duration-300 shadow-xl`}
     >
       <div
         className="flex justify-between items-center p-1"
@@ -44,7 +44,7 @@ export default function Sidebar({
       >
         {isOpen ? <IoIosArrowForward /> : <IoIosArrowBack />}
       </div>
-      <div className="py-4 flex flex-col gap-4 flex-1 pr-6">
+      <div className="sidebar-content">
         <TextInput prompt="Where from?" text={from} setText={setFrom} />
         <TextInput prompt="Where to?" text={to} setText={setTo} />
         <button

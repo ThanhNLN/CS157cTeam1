@@ -17,7 +17,9 @@ body {
 /* ========== Navbar Styles ========== */
 
 .navbar {
-  @apply flex justify-between items-center px-8 h-[70px] shadow-md bg-white border-b border-gray-200;
+  @apply absolute top-0 left-0 right-0 z-50 
+         flex justify-between items-center 
+         px-8 h-[70px] shadow-md bg-white border-b border-gray-200;
 }
 
 .navbar-left {
@@ -84,7 +86,8 @@ body {
 /* ========== About Page Styles ========== */
 
 .about-container {
-  @apply max-w-3xl mx-auto px-6 py-10 text-gray-800;
+  @apply max-w-3xl mx-auto px-6 text-gray-800 flex flex-col justify-center;
+  min-height: calc(100vh - 70px); /* Full screen height - navbar */
 }
 
 .about-title {
@@ -97,4 +100,25 @@ body {
 
 .about-list {
   @apply list-disc pl-6 mb-6 text-lg;
+}
+
+/* ========== Sidebar Styles ========== */
+
+.sidebar-content {
+  @apply h-full flex flex-col justify-center gap-6 px-6 py-4;
+}
+
+/* Sidebar input label */
+.sidebar-label {
+  @apply font-bold text-[#002531] mb-1;
+}
+
+/* Navigate button text */
+.sidebar-button {
+  @apply px-6 py-2 text-white text-lg font-bold rounded-md shadow-md transition-all;
+  background-color: #002531;
+}
+
+.sidebar-button:hover {
+  background-color: #00465c;
 }
