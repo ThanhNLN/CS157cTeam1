@@ -1,4 +1,27 @@
-# CS157cProject: Team project in NoSQL class at SJSU - Spring 2025
+# ✈️ AERONAV – CS157C Team Project
+
+**Smart Flight Planning Assistant**  
+_San Jose State University – Spring 2025_
+
+---
+
+## 📖 Overview
+
+**AERONAV** is a smart flight planning assistant designed for private pilots. It visualizes optimal flight routes by incorporating real-time weather data, airspace navigation info from the FAA, and intelligent graph-based pathfinding.
+
+This project was developed by **Team 1** for the NoSQL course (CS157C) and demonstrates full-stack integration using **Neo4j**, **React**, and external aviation APIs.
+
+---
+
+## 🚀 Key Features
+
+- ✈️ Graph-based flight routing using Neo4j (waypoints = nodes, airways = edges)
+- 🌦️ Real-time weather data linked to routes by midpoint proximity (≤ 0.5° lat/lon)
+- 📡 FAA airspace/navigation data loaded and mapped into Neo4j
+- 🧠 Optimized routing via Dijkstra algorithm, factoring in weather
+- 🖥️ Clean, interactive UI built with React, Vite, Tailwind, and Google Maps
+
+---
 
 ## 🛠️ Setup Instructions
 
@@ -38,44 +61,54 @@ Make sure your API Key is enable for Java
 This .env file is required for the backend to connect to the Neo4j database.
 The .env file is excluded from Git using .gitignore, so each user must create their own.
 
-### 4. Load neccesary files
+### 4. Load FAA Navigation Data
 
-Follow link
+    1.	Download data from the FAA NASR subscription page:
 
-```
-https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/
-```
-
-Download the Current Subscription (e.g. Subscription effective April 17, 2025)
-Unzip and move 4 files
+https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/ 2. Unzip the archive and copy the following files into:
 
 ```
-APT.txt
-AWY.txt
-FIX.txt
-STARDP.txt
+backend/load_data/
+├── APT.txt
+├── AWY.txt
+├── FIX.txt
+└── STARDP.txt
 ```
 
-into the project directory backend/load_data
-
-Run the backend/load_data/load.sh with administrator permission
-`sudo bash load.sh`
-
-### Run app
-
-On backend terminal run
+    3.	Run the loader script (requires admin privileges):
 
 ```
-install pnpm
+cd backend/load_data
+sudo bash load.sh
+```
+
+### 5. Run app
+
+🔹 Backend Terminal
+
+```
+cd backend
+pnpm install
 pnpm run start
 ```
 
-On frontend terminal run
+🔹 Frontend Terminal
 
 ```
-install pnpm
+cd frontend
+pnpm install
 pnpm run dev
 ```
+
+### 🧠 How It Works (Backend Pipeline)
+
+    1.	FAA nav data is parsed and loaded into a Neo4j graph
+    •	Waypoints = nodes, Airways = edges
+    2.	Each route segment (edge) is matched to weather data
+    •	If the midpoint of an edge is within 0.5° of a weather event, it’s linked
+    3.	A custom pathfinding algorithm (e.g. Dijkstra) runs in Neo4j
+    •	Routes are scored based on length and weather severity
+    4.	Results are sent to the frontend and visualized on a Google Map
 
 ### 🧰 Tech Stack
 
