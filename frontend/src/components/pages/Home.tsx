@@ -4,8 +4,11 @@ import Navbar from "../organisms/Navbar";
 import Sidebar from "../organisms/Sidebar";
 import { getPath, getPathNoWeather } from "../../services/pathfinder";
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 export default function Home() {
+  const location = useLocation(); // Read router state
+  const sidebarOpenFromLanding = location.state?.sidebarOpen ?? false; // Detect if launched from LandingPage
   const {
     mutate: weatherMutate,
     data: weatherData,
@@ -68,6 +71,7 @@ export default function Home() {
           isPending={weatherIsPending}
           isError={error}
           isSuccess={weatherIsSuccess}
+          defaultOpen={sidebarOpenFromLanding}
         />
       </div>
     </>

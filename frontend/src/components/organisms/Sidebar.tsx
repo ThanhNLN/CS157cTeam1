@@ -16,6 +16,7 @@ interface SidebarProps {
   isPending: boolean;
   isError: boolean;
   isSuccess: boolean;
+  defaultOpen: boolean;
 }
 
 export default function Sidebar({
@@ -23,14 +24,17 @@ export default function Sidebar({
   isPending,
   isError,
   isSuccess,
+  defaultOpen,
 }: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  // Sidebar open/close state
+  const [isOpen, setIsOpen] = useState(() => defaultOpen ?? false); // Uses true if passed, otherwise false
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
   return (
     <div
       className={`bg-white w-1/4 h-full absolute top-0 ${
+        // isOpen ? "left-0" : "-left-[calc(25%-8px-16px)]" // opens from the LEFT instead of the right
         isOpen ? "right-0" : "-right-[calc(25%-8px-16px)]"
       } z-10 flex transition-all duration-300 shadow-xl`}
     >

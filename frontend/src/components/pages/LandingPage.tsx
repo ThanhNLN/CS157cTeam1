@@ -20,15 +20,21 @@ export default function LandingPage() {
           <img src="/name_logo.png" alt="AERONAV" className="landing-logo" />
 
           {/* Title headline for landing screen */}
-          <h1 className="landing-title">Smart Flight Planning for Private Pilots</h1>
+          <h1 className="landing-title">
+            Smart Flight Planning for Private Pilots
+          </h1>
 
           {/* Subtitle or supporting description */}
           <p className="landing-subtitle">
-            Get optimal routes, live weather, and traffic-based navigation with AERONAV.
+            Get optimal routes, live weather, and traffic-based navigation with
+            AERONAV.
           </p>
 
           {/* Call-to-action button to enter the main map planner */}
-          <button className="landing-button" onClick={() => navigate("/home")}>
+          <button
+            className="landing-button"
+            onClick={() => navigate("/home", { state: { sidebarOpen: true } })}
+          >
             Start Planning →
           </button>
         </div>
