@@ -13,3 +13,88 @@
 body {
   overflow: hidden;
 }
+
+/* ========== Navbar Styles ========== */
+
+.navbar {
+  @apply flex justify-between items-center px-8 h-[70px] shadow-md bg-white border-b border-gray-200;
+}
+
+.navbar-left {
+  @apply flex items-center gap-4;
+}
+
+.navbar-logo {
+  @apply w-16 h-16 object-contain;
+}
+
+.navbar-title {
+  @apply text-4xl font-extrabold text-gray-800 tracking-wide;
+}
+
+.navbar-tabs {
+  @apply flex gap-4;
+}
+
+.navbar-tab-button {
+  @apply px-5 py-2 text-white text-lg rounded-md transition-colors duration-200;
+  background-color: #002531;
+}
+
+.navbar-tab-button:hover {
+  background-color: #00465c;
+}
+
+.active-tab-button {
+  background-color: #006a8e;
+  @apply font-bold shadow-md;
+}
+
+/* ========== Landing Page Styles ========== */
+
+.landing-wrapper {
+  @apply h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-200;
+}
+
+.landing-content {
+  @apply text-center px-6 max-w-2xl;
+}
+
+.landing-logo {
+  @apply mx-auto w-70 h-70 mb-6;
+}
+
+.landing-title {
+  @apply text-4xl font-extrabold text-gray-800 mb-4;
+}
+
+.landing-subtitle {
+  @apply text-lg text-gray-600 mb-8;
+}
+
+.landing-button {
+  @apply px-6 py-3 text-white text-lg font-semibold rounded-md shadow-md transition-all;
+  background-color: #002531;
+}
+
+.landing-button:hover {
+  background-color: #00465c;
+}
+
+/* ========== About Page Styles ========== */
+
+.about-container {
+  @apply max-w-3xl mx-auto px-6 py-10 text-gray-800;
+}
+
+.about-title {
+  @apply text-4xl font-extrabold mb-6 text-center;
+}
+
+.about-paragraph {
+  @apply text-lg mb-4 leading-relaxed;
+}
+
+.about-list {
+  @apply list-disc pl-6 mb-6 text-lg;
+}
