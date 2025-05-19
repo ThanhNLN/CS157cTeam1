@@ -31,8 +31,12 @@ export class PathfinderService {
           [n IN nodes(path) | {
             navaidId: n.navaidId,
             longitude: n.longitude,
-            latitude: n.latitude
-            
+            latitude: n.latitude, 
+            weatherCode: n.weatherCode, 
+            cloudCover: n.cloudCover, 
+            temperature: n.temperature, 
+            windSpeed: n.windSpeed,
+            description: n.description
           }] AS path
       ORDER BY index;
     `;
@@ -76,7 +80,12 @@ export class PathfinderService {
           [n IN nodes(path) | {
             navaidId: n.navaidId,
             longitude: n.longitude,
-            latitude: n.latitude
+            latitude: n.latitude, 
+            weatherCode: n.weatherCode, 
+            cloudCover: n.cloudCover, 
+            temperature: n.temperature, 
+            windSpeed: n.windSpeed,
+            description: n.description
           }] AS path
       ORDER BY index;
     `;
@@ -85,7 +94,6 @@ export class PathfinderService {
     if (result.records.length === 0) {
       return { code: 500, error: 'No path found' };
     }
-    // console.log(JSON.stringify(result));
 
     const totalCost = result.records[0].get('totalCost');
     const totalDistance = result.records[0].get('totalDistance');

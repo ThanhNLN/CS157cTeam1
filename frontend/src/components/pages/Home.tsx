@@ -3,11 +3,14 @@ import Map from "../organisms/Map";
 import Navbar from "../organisms/Navbar";
 import Sidebar from "../organisms/Sidebar";
 import { getPath, getPathNoWeather } from "../../services/pathfinder";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import Details from "../organisms/Details";
+import { MarkerDto } from "../types/dto";
 
 export default function Home() {
   const location = useLocation(); // Read router state
+  const [selectedMarker, setSelectedMarker] = useState<MarkerDto | null>(null);
   const sidebarOpenFromLanding = location.state?.sidebarOpen ?? false; // Detect if launched from LandingPage
   const {
     mutate: weatherMutate,
@@ -20,12 +23,7 @@ export default function Home() {
       await getPath(from, to),
   });
 
-  const {
-    mutate: noWeatherMutate,
-    data: noWeatherData,
-    isPending: noWeatherIsPending,
-    isSuccess: noWeatherIsSuccess,
-  } = useMutation({
+  const { mutate: noWeatherMutate, data: noWeatherData } = useMutation({
     mutationKey: ["routeNoWeather"],
     mutationFn: async ({ from, to }: { from: string; to: string }) =>
       await getPathNoWeather(from, to),
@@ -37,28 +35,14 @@ export default function Home() {
     console.log("noWeatherData", noWeatherData);
   }, [weatherData, noWeatherData]);
 
-  const weatherMarkers =
-    weatherData?.code == 500
-      ? []
-      : weatherData?.path.map((marker) => ({
-          lng: marker.longitude,
-          lat: marker.latitude,
-          name: marker.navaidId,
-        })) ?? [];
+  const weatherMarkers = weatherData?.code ? [] : weatherData?.path;
 
-  const noWeatherMarkers =
-    noWeatherData?.code == 500
-      ? []
-      : noWeatherData?.path.map((marker) => ({
-          lng: marker.longitude,
-          lat: marker.latitude,
-          name: marker.navaidId,
-        })) ?? [];
+  const noWeatherMarkers = noWeatherData?.code ? [] : noWeatherData?.path;
 
   return (
     <>
       <Navbar />
-      <div className="h-[calc(100vh-50px)]">
+      <div className="h-screen">
         <Sidebar
           mutate={(from, to) => {
             weatherMutate(from, to);
@@ -72,8 +56,10 @@ export default function Home() {
         <Map
           weatherMarkers={weatherMarkers}
           noWeatherMarkers={noWeatherMarkers}
+          setSelectedMarker={setSelectedMarker}
         />
       </div>
+      <Details selectedMarker={selectedMarker} />
     </>
   );
 }

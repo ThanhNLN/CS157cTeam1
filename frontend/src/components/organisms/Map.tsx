@@ -1,21 +1,19 @@
 import { APIProvider, Marker, useMap } from "@vis.gl/react-google-maps";
 import { Map as GoogleMap } from "@vis.gl/react-google-maps";
 import { useEffect } from "react";
+import { MarkerDto } from "../types/dto";
 
 interface MapProps {
-  weatherMarkers?: {
-    name: string;
-    lat: number;
-    lng: number;
-  }[];
-  noWeatherMarkers?: {
-    name: string;
-    lat: number;
-    lng: number;
-  }[];
+  weatherMarkers?: MarkerDto[];
+  noWeatherMarkers?: MarkerDto[];
+  setSelectedMarker: React.Dispatch<React.SetStateAction<MarkerDto | null>>;
 }
 
-export default function Map({ weatherMarkers, noWeatherMarkers }: MapProps) {
+export default function Map({
+  weatherMarkers,
+  noWeatherMarkers,
+  setSelectedMarker,
+}: MapProps) {
   function WeatherPolylineOverlay() {
     const map = useMap();
 
@@ -23,7 +21,12 @@ export default function Map({ weatherMarkers, noWeatherMarkers }: MapProps) {
       if (!map || !window.google) return;
 
       const polyline = new window.google.maps.Polyline({
-        path: weatherMarkers,
+        path:
+          weatherMarkers?.map((marker) => ({
+            lng: marker.longitude,
+            lat: marker.latitude,
+            name: marker.navaidId,
+          })) ?? [],
         geodesic: true,
         strokeColor: "#FF0000",
         strokeOpacity: 1.0,
@@ -46,7 +49,12 @@ export default function Map({ weatherMarkers, noWeatherMarkers }: MapProps) {
       if (!map || !window.google) return;
 
       const polyline = new window.google.maps.Polyline({
-        path: noWeatherMarkers,
+        path:
+          noWeatherMarkers?.map((marker) => ({
+            lng: marker.longitude,
+            lat: marker.latitude,
+            name: marker.navaidId,
+          })) ?? [],
         geodesic: true,
         strokeColor: "#7777FF",
         strokeOpacity: 1.0,
@@ -62,8 +70,6 @@ export default function Map({ weatherMarkers, noWeatherMarkers }: MapProps) {
     return null;
   }
 
-  console.log(weatherMarkers, noWeatherMarkers);
-
   return (
     <>
       <div className="w-[calc(100%-8px-16px)] h-full">
@@ -74,32 +80,36 @@ export default function Map({ weatherMarkers, noWeatherMarkers }: MapProps) {
             gestureHandling={"greedy"}
             disableDefaultUI={true}
           >
-            {weatherMarkers && [
-              weatherMarkers.map((marker) => (
-                <Marker
-                  key={marker.name}
-                  label={marker.name}
-                  position={{ lat: marker.lat, lng: marker.lng }}
-                />
-              )),
-            ]}
-            {noWeatherMarkers && [
-              noWeatherMarkers.map((marker) => (
-                <Marker
-                  key={marker.name}
-                  label={marker.name}
-                  position={{ lat: marker.lat, lng: marker.lng }}
-                  icon={{
-                    path: window.google.maps.SymbolPath.CIRCLE,
-                    scale: 8,
-                    fillColor: "#7777FF",
-                    fillOpacity: 1,
-                    strokeWeight: 1,
-                    strokeColor: "#000000",
-                  }}
-                />
-              )),
-            ]}
+            {weatherMarkers
+              ? weatherMarkers.map((marker) => (
+                  <Marker
+                    onClick={() => setSelectedMarker(marker)}
+                    key={marker.navaidId}
+                    label={marker.navaidId}
+                    position={{ lat: marker.latitude, lng: marker.longitude }}
+                  />
+                ))
+              : null}
+            {noWeatherMarkers
+              ? noWeatherMarkers.map((marker) => {
+                  return (
+                    <Marker
+                      onClick={() => setSelectedMarker(marker)}
+                      key={marker.navaidId}
+                      label={marker.navaidId}
+                      position={{ lat: marker.latitude, lng: marker.longitude }}
+                      icon={{
+                        path: window.google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: "#7777FF",
+                        fillOpacity: 1,
+                        strokeWeight: 1,
+                        strokeColor: "#000000",
+                      }}
+                    />
+                  );
+                })
+              : []}
             <WeatherPolylineOverlay />
             <NoWeatherPolylineOverlay />
           </GoogleMap>
